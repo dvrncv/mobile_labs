@@ -13,6 +13,10 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SignUpScreen(
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
     onBack: () -> Unit = {},
     onSignUp: () -> Unit = {},
     onSignIn: () -> Unit = {}
@@ -20,8 +24,6 @@ fun SignUpScreen(
     val focusManager = LocalFocusManager.current
 
     var name by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
     var confirmPassword by rememberSaveable { mutableStateOf("") }
     var gender by rememberSaveable { mutableStateOf("") }
     var showPassword by rememberSaveable { mutableStateOf(false) }
@@ -94,13 +96,19 @@ fun SignUpScreen(
 
                 EmailField(
                     value = email,
-                    onValueChange = { email = it; emailError = null },
+                    onValueChange = {
+                        onEmailChange(it)
+                        emailError = null
+                    },
                     error = emailError,
                 )
 
                 PasswordField(
                     value = password,
-                    onValueChange = { password = it; passwordError = null },
+                    onValueChange = {
+                        onPasswordChange(it)
+                        passwordError = null
+                    },
                     showPassword = showPassword,
                     onToggleVisibility = { showPassword = !showPassword },
                     error = passwordError,

@@ -2,14 +2,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("kotlin-parcelize")
 }
 
 android {
-    namespace = "com.example.mobile_labs.signIn"
+    namespace = "com.example.mobile_labs"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.mobile_labs.signIn"
+        applicationId = "com.example.mobile_labs"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -50,6 +51,10 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.fragment.ktx)
+    implementation(libs.androidx.fragment.compose)
+    implementation(libs.androidx.appcompat)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

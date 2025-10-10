@@ -15,14 +15,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SignInScreen(
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
     onBack: () -> Unit = {},
     onSignUp: () -> Unit = {},
     onSignIn: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
 
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
     var showPassword by rememberSaveable { mutableStateOf(false) }
 
     var emailError by remember { mutableStateOf<String?>(null) }
@@ -77,18 +79,18 @@ fun SignInScreen(
                     EmailField(
                         value = email,
                         onValueChange = {
-                            email = it
-                            if (emailError != null) emailError = null
+                            onEmailChange(it)
+                            emailError = null
                         },
                         error = emailError,
-                        onClear = { email = "" },
+                        onClear = { onEmailChange("") }
                     )
 
                     PasswordField(
                         value = password,
                         onValueChange = {
-                            password = it
-                            if (passwordError != null) passwordError = null
+                            onPasswordChange(it)
+                            passwordError = null
                         },
                         showPassword = showPassword,
                         onToggleVisibility = { showPassword = !showPassword },

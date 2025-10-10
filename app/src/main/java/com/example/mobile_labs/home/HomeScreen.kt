@@ -12,7 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.mobile_labs.signIn.R
+import com.example.mobile_labs.R
 
 data class Princess(
     val name: String,
