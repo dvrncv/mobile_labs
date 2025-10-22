@@ -27,17 +27,19 @@ class MainActivity : FragmentActivity(R.layout.activity_main) {
     }
 
     fun navigateToSignIn(user: User? = null, email: String? = null, password: String? = null) {
+        supportFragmentManager.popBackStack(null, androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
         val fragment = SignInFragment.newInstance(user, email, password)
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, fragment)
-            .addToBackStack(null)
+            .addToBackStack("SignIn")
             .commit()
     }
 
     fun navigateToSignUp() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_container, SignUpFragment())
-            .addToBackStack(null)
+            .addToBackStack("SignUp")
             .commit()
     }
 
