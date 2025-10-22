@@ -4,13 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import com.example.mobile_labs.MainActivity
+import androidx.navigation.fragment.findNavController
+import com.example.mobile_labs.model.User
 import com.example.mobile_labs.ui.theme.Mobile_labsTheme
 
 class SignUpFragment : Fragment() {
@@ -22,21 +21,24 @@ class SignUpFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
+                var email by rememberSaveable { mutableStateOf("") }
+                var password by rememberSaveable { mutableStateOf("") }
                 Mobile_labsTheme {
-                    var email by rememberSaveable { mutableStateOf(arguments?.getString("email") ?: "") }
-                    var password by rememberSaveable { mutableStateOf(arguments?.getString("password") ?: "") }
-
                     SignUpScreen(
                         email = email,
                         password = password,
                         onEmailChange = { email = it },
                         onPasswordChange = { password = it },
-                        onBack = { requireActivity().onBackPressedDispatcher.onBackPressed() },
                         onSignIn = {
-                            (activity as? MainActivity)?.navigateToSignIn(email = email, password = password)
+                            val user = User(name = "", email = email,  password = password)
+                            findNavController().navigate(SignUpFragmentDirections.actionSignUpToSignIn(user))
                         },
                         onSignUp = {
-                            (activity as? MainActivity)?.navigateToSignIn(email = email, password = password)
+                            val user = User(name = "", email = email,  password = password)
+                            findNavController().navigate(SignUpFragmentDirections.actionSignUpToSignIn(user))
+                        },
+                        onBack = {
+                            parentFragmentManager.popBackStack()
                         }
                     )
                 }

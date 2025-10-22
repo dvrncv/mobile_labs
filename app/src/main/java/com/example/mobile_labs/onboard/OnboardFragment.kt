@@ -6,7 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
-import com.example.mobile_labs.MainActivity
+import androidx.navigation.fragment.findNavController
+import com.example.mobile_labs.R
 import com.example.mobile_labs.ui.theme.Mobile_labsTheme
 
 class OnboardFragment : Fragment() {
@@ -21,11 +22,11 @@ class OnboardFragment : Fragment() {
                 Mobile_labsTheme {
                     OnboardScreen(
                         onSignUp = {
-                            (activity as? MainActivity)?.navigateToSignUp()
+                            findNavController().navigate(OnboardFragmentDirections.actionOnboardToSignUp())
                         },
                         onSignIn = {
-                            (activity as? MainActivity)?.navigateToSignIn()
-                        },
+                            findNavController().navigate(OnboardFragmentDirections.actionOnboardToSignIn(user = null))
+                        }
                     )
                 }
             }

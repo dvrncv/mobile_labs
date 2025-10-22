@@ -2,6 +2,7 @@ package com.example.mobile_labs.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 @Parcelize
 data class User (
@@ -9,4 +10,3 @@ data class User (
     val email: String,
     val password: String
 ) : Parcelable
-
