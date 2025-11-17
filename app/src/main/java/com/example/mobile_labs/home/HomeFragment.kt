@@ -8,8 +8,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import com.example.mobile_labs.ui.theme.Mobile_labsTheme
 
-class HomeFragment : Fragment() {
 
+class HomeFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -38,6 +38,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+
     }
     buildFeatures {
         compose = true
@@ -47,6 +48,14 @@ android {
 
 dependencies {
     val nav_version = "2.9.5"
+    val ktor_version = "2.3.4"
+
+    implementation("io.ktor:ktor-client-core:${ktor_version}")
+    implementation("io.ktor:ktor-client-okhttp:${ktor_version}")
+    implementation("io.ktor:ktor-client-android:${ktor_version}")
+    implementation("io.ktor:ktor-client-logging:${ktor_version}")
+    implementation("io.ktor:ktor-client-content-negotiation:${ktor_version}")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:${ktor_version}")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -59,6 +68,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.fragment.compose)
     implementation(libs.androidx.appcompat)
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
     implementation("androidx.compose.material:material-icons-extended:1.7.5")
     implementation("androidx.navigation:navigation-fragment:${nav_version}")
