@@ -28,32 +28,27 @@ import androidx.compose.runtime.mutableStateListOf
 import com.example.mobile_labs.R
 import com.example.mobile_labs.model.disney.DisneyCharacter
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import com.example.mobile_labs.network.ktor.KtorDisneyApi
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onOpenSettings: () -> Unit,
+    fontSize: Float
+) {
     val characters = remember { mutableStateListOf<DisneyCharacter>() }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) { 
-        runCatching {
-            KtorDisneyApi.getCharacters(351..400)
-        }
+    LaunchedEffect(Unit) {
+        runCatching { KtorDisneyApi.getCharacters(351..400) }
             .onSuccess { result ->
                 result.onSuccess { chars ->
                     characters.clear()
                     characters.addAll(chars)
-                    Log.d("HomeScreen", "Загружено ${chars.size} персонажей")
-                }.onFailure { ex ->
-                    errorMessage = ex.message
-                    Log.e("HomeScreen", "Ошибка загрузки: ${ex.message}")
-                }
+                }.onFailure { ex -> errorMessage = ex.message }
             }
-            .onFailure { ex ->
-                errorMessage = ex.message
-                Log.e("HomeScreen", "Ошибка сети: ${ex.message}")
-            }
+            .onFailure { ex -> errorMessage = ex.message }
         isLoading = false
     }
 
@@ -66,15 +61,19 @@ fun HomeScreen() {
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            TopBar(title = "Персонажи Дисней")
+            TopBar(
+                title = "Персонажи Дисней",
+                onSettingsClick = onOpenSettings,
+                fontSize = fontSize
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
                 when {
-                    isLoading -> LoadingContent()
-                    errorMessage != null -> ErrorContent(errorMessage!!)
-                    characters.isEmpty() -> EmptyContent()
-                    else -> CharactersList(characters)
+                    isLoading -> LoadingContent(fontSize)
+                    errorMessage != null -> ErrorContent(errorMessage!!, fontSize)
+                    characters.isEmpty() -> EmptyContent(fontSize)
+                    else -> CharactersList(characters, fontSize)
                 }
             }
         }
@@ -82,32 +81,32 @@ fun HomeScreen() {
 }
 
 @Composable
-fun LoadingContent() {
+fun LoadingContent(fontSize: Float) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         CircularProgressIndicator(color = Color.White)
         Spacer(Modifier.height(8.dp))
-        Text("Загрузка", color = Color.White)
+        Text("Загрузка", color = Color.White, fontSize = fontSize.sp)
     }
 }
 
 @Composable
-fun ErrorContent(message: String) {
-    Text("Ошибка: $message", color = Color.White)
+fun ErrorContent(message: String, fontSize: Float) {
+    Text("Ошибка: $message", color = Color.White, fontSize = fontSize.sp)
 }
 
 @Composable
-fun EmptyContent() {
-    Text("Нет данных для отображения", color = Color.White)
+fun EmptyContent(fontSize: Float) {
+    Text("Нет данных для отображения", color = Color.White, fontSize = fontSize.sp)
 }
 
 @Composable
-fun CharactersList(characters: List<DisneyCharacter>) {
+fun CharactersList(characters: List<DisneyCharacter>, fontSize: Float) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
     ) {
         items(characters) { character ->
-            DisneyCharacterCard(character = character, modifier = Modifier)
+            DisneyCharacterCard(character = character, fontSize = fontSize)
         }
     }
 }

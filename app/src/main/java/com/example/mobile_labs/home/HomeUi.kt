@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +42,8 @@ import com.example.mobile_labs.ui.theme.Pink80
 @Composable
 fun TopBar(
     title: String,
+    onSettingsClick: () -> Unit,
+    fontSize: Float
 ) {
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
@@ -46,50 +53,56 @@ fun TopBar(
             .padding(top = topPadding)
             .height(50.dp)
             .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(Pink80, Pink40)
-                ),
-                shape = RoundedCornerShape(24.dp)
+                brush = Brush.horizontalGradient(listOf(Pink80, Pink40))
             )
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge.copy(
+                fontSize = fontSize.sp,
                 color = Color.White,
                 shadow = Shadow(
                     color = Color.Black.copy(alpha = 0.3f),
-                    offset = Offset(2f, 2f),
+                    offset = Offset(2f,2f),
                     blurRadius = 4f
                 )
             ),
             modifier = Modifier.align(Alignment.Center)
         )
+
+        IconButton(
+            onClick = onSettingsClick,
+            modifier = Modifier.align(Alignment.CenterEnd)
+        ) {
+            Icon(
+                Icons.Filled.Settings,
+                contentDescription = "Настройки",
+                tint = Color.White,
+                modifier = Modifier.size(fontSize.dp)
+            )
+        }
     }
 }
 
 @Composable
 fun DisneyCharacterCard(
     character: DisneyCharacter,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fontSize: Float
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 10.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(
-            modifier = Modifier
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(Pink80, Pink40)
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                )
+            modifier = Modifier.background(
+                brush = Brush.verticalGradient(colors = listOf(Pink80, Pink40)),
+                shape = RoundedCornerShape(20.dp)
+            )
         ) {
             Column {
                 Box(
@@ -125,7 +138,7 @@ fun DisneyCharacterCard(
                     Text(
                         text = character.name,
                         color = Color.White,
-                        fontSize = 22.sp,
+                        fontSize = fontSize.sp,
                         style = MaterialTheme.typography.titleLarge.copy(
                             shadow = Shadow(
                                 color = Color.Black.copy(alpha = 0.3f),
@@ -139,32 +152,37 @@ fun DisneyCharacterCard(
                     )
                 }
 
-                CharacterInfoBlock(character)
+                CharacterInfoBlock(character, fontSize)
             }
         }
     }
 }
 
+
 @Composable
 private fun InfoSection(
     title: String,
-    items: List<String>
+    items: List<String>,
+    fontSize: Float
 ) {
     if (items.isNotEmpty()) {
         Text(
             text = title,
             color = Color.White.copy(alpha = 0.9f),
-            fontSize = 15.sp,
+            fontSize = fontSize.sp,
             style = MaterialTheme.typography.labelLarge
         )
         Spacer(Modifier.height(4.dp))
 
-        items.forEach {
+        items.forEach { item ->
             Text(
-                text = "- $it",
+                text = "- $item",
                 color = Color.White.copy(alpha = 0.8f),
-                fontSize = 14.sp,
-                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
+                fontSize = fontSize.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, bottom = 2.dp),
+                lineHeight = fontSize.sp
             )
         }
 
@@ -172,16 +190,20 @@ private fun InfoSection(
     }
 }
 
+
 @Composable
-fun CharacterInfoBlock(character: DisneyCharacter) {
+fun CharacterInfoBlock(
+    character: DisneyCharacter,
+    fontSize: Float
+) {
     Column(modifier = Modifier.padding(16.dp)) {
-        InfoSection("Фильмы", character.films)
-        InfoSection("ТВ-шоу", character.tvShows)
-        InfoSection("Игры", character.videoGames)
-        InfoSection("Короткометражки", character.shortFilms)
-        InfoSection("Аттракционы", character.parkAttractions)
-        InfoSection("Союзники", character.allies)
-        InfoSection("Враги", character.enemies)
+        InfoSection("Фильмы", character.films, fontSize)
+        InfoSection("ТВ-шоу", character.tvShows, fontSize)
+        InfoSection("Игры", character.videoGames, fontSize)
+        InfoSection("Короткометражки", character.shortFilms, fontSize)
+        InfoSection("Аттракционы", character.parkAttractions, fontSize)
+        InfoSection("Союзники", character.allies, fontSize)
+        InfoSection("Враги", character.enemies, fontSize)
 
         if (
             character.films.isEmpty() &&
@@ -195,7 +217,7 @@ fun CharacterInfoBlock(character: DisneyCharacter) {
             Text(
                 text = "Информация отсутствует",
                 color = Color.White.copy(alpha = 0.6f),
-                fontSize = 14.sp
+                fontSize = fontSize.sp
             )
         }
     }

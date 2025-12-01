@@ -19,6 +19,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/settings"
+        android:name="com.example.mobile_labs.setting.SettingsFragment"
+        android:label="Settings">
+    </fragment>
+
+    <fragment
         android:id="@+id/sign_in"
         android:name="com.example.mobile_labs.signIn.SignInFragment"
         android:label="SignInFragment">
@@ -39,6 +45,7 @@
             app:popUpToInclusive="true" />
     </fragment>
 
+
     <fragment
         android:id="@+id/sign_up"
         android:name="com.example.mobile_labs.signUp.SignUpFragment"
@@ -58,6 +65,11 @@
             android:name="name"
             app:argType="string"
             app:nullable="true"/>
+
+        <action
+            android:id="@+id/action_home_to_settings"
+            app:destination="@id/settings" />
+
     </fragment>
 
 </navigation>
