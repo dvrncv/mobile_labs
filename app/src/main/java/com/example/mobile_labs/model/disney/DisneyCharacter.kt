@@ -12,23 +12,18 @@ data class DisneyCharacter(
 
     val films: List<String> = emptyList(),
 
-    @SerialName("shortFilms")
     val shortFilms: List<String> = emptyList(),
 
-    @SerialName("tvShows")
     val tvShows: List<String> = emptyList(),
 
-    @SerialName("videoGames")
     val videoGames: List<String> = emptyList(),
 
-    @SerialName("parkAttractions")
     val parkAttractions: List<String> = emptyList(),
 
     val allies: List<String> = emptyList(),
 
     val enemies: List<String> = emptyList(),
 
-    @SerialName("imageUrl")
     val imageUrl: String? = null,
 
     val url: String

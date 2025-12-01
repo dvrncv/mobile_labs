@@ -16,9 +16,23 @@ import kotlinx.coroutines.coroutineScope
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-class KtorDisneyCharacterApi(
-    private val client: HttpClient = defaultClient()
-) {
+object KtorDisneyApi {
+    private const val TAG = "DisneyService"
+    private const val BASE_URL = "https://api.disneyapi.dev/character"
+
+    private val client = HttpClient {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+        install(Logging) {
+            logger = object : Logger {
+                override fun log(message: String) {
+                    Log.d(TAG, "Ktor → $message")
+                }
+            }
+            level = LogLevel.ALL
+        }
+    }
 
     suspend fun getCharacters(ids: IntRange = 351..400): Result<List<DisneyCharacter>> =
         runCatching {
@@ -42,23 +56,4 @@ class KtorDisneyCharacterApi(
                 }.awaitAll().filterNotNull()
             }
         }
-
-    companion object {
-        private const val TAG = "DisneyService"
-        private const val BASE_URL = "https://api.disneyapi.dev/character"
-
-        private fun defaultClient() = HttpClient {
-            install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
-            }
-            install(Logging) {
-                logger = object : Logger {
-                    override fun log(message: String) {
-                        Log.d(TAG, "Ktor → $message")
-                    }
-                }
-                level = LogLevel.ALL
-            }
-        }
-    }
 }

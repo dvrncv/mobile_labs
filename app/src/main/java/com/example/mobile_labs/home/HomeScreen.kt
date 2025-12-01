@@ -27,8 +27,8 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import com.example.mobile_labs.R
 import com.example.mobile_labs.model.disney.DisneyCharacter
-import com.example.mobile_labs.network.ktor.KtorDisneyCharacterApi
 import androidx.compose.ui.graphics.Color
+import com.example.mobile_labs.network.ktor.KtorDisneyApi
 
 @Composable
 fun HomeScreen() {
@@ -36,9 +36,10 @@ fun HomeScreen() {
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit) {
-        val service = KtorDisneyCharacterApi()
-        runCatching { service.getCharacters(351..400) }
+    LaunchedEffect(Unit) { 
+        runCatching {
+            KtorDisneyApi.getCharacters(351..400)
+        }
             .onSuccess { result ->
                 result.onSuccess { chars ->
                     characters.clear()
