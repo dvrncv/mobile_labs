@@ -27,6 +27,7 @@ import com.example.mobile_labs.R
 import com.example.mobile_labs.ui.theme.Pink40
 import com.example.mobile_labs.ui.theme.Pink80
 import androidx.compose.material.icons.filled.Notifications
+import com.example.mobile_labs.store.file.FileInfo
 
 @Composable
 fun SettingsUi(
@@ -34,8 +35,15 @@ fun SettingsUi(
     fontSize: Float,
     onNotificationsChange: (Boolean) -> Unit,
     onFontSizeChange: (Float) -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+
+    externalFileInfo: FileInfo?,
+    backupAvailable: Boolean,
+    onCreateBackupClick: () -> Unit,
+    onRestoreClick: () -> Unit,
+    onDeleteBackupClick: () -> Unit
 ) {
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fon1),
@@ -44,36 +52,91 @@ fun SettingsUi(
             contentScale = ContentScale.Crop
         )
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column {
             SettingsTopBar(
                 title = "Настройки",
                 onBackClick = onBackClick,
                 fontSize = fontSize
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
+                    .padding(16.dp)
             ) {
-                FontSizeSection(
-                    fontSize = fontSize,
-                    onFontSizeChange = onFontSizeChange
-                )
 
-                NotificationSection(
-                    notificationsEnabled = notificationsEnabled,
-                    onNotificationsChange = onNotificationsChange,
+                FontSizeSection(fontSize, onFontSizeChange)
+                NotificationSection(notificationsEnabled, onNotificationsChange, fontSize)
+
+                BackupSection(
+                    externalFileInfo = externalFileInfo,
+                    backupAvailable = backupAvailable,
+                    onCreateBackupClick = onCreateBackupClick,
+                    onRestoreClick = onRestoreClick,
+                    onDeleteBackupClick = onDeleteBackupClick,
                     fontSize = fontSize
                 )
             }
         }
     }
 }
+
+@Composable
+fun BackupSection(
+    externalFileInfo: FileInfo?,
+    backupAvailable: Boolean,
+    onCreateBackupClick: () -> Unit,
+    onRestoreClick: () -> Unit,
+    onDeleteBackupClick: () -> Unit,
+    fontSize: Float
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
+    ) {
+        Column(Modifier.padding(16.dp)) {
+
+            Text(
+                "Резервное копирование",
+                fontSize = fontSize.sp,
+                color = Color.White
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Button(onClick = onCreateBackupClick) {
+                Text("Создать резервную копию", fontSize = fontSize.sp)
+            }
+
+            if (backupAvailable) {
+                Spacer(Modifier.height(8.dp))
+                Button(onClick = onRestoreClick) {
+                    Text("Восстановить из внутреннего", fontSize = fontSize.sp)
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = onDeleteBackupClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Удалить резервную копию", fontSize = fontSize.sp)
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            if (externalFileInfo != null) {
+                Text("Размер внешнего файла: ${externalFileInfo.formattedSize}", color = Color.White)
+                Text("Изменён: ${externalFileInfo.formattedDate}", color = Color.White)
+            } else {
+                Text("Внешнего файла нет", color = Color.White)
+            }
+        }
+    }
+}
+
+
 
 @Composable
 private fun FontSizeSection(

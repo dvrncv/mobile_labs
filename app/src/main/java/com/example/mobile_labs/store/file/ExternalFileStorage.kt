@@ -1,106 +1,113 @@
 package com.example.mobile_labs.store.file
 
-import android.content.ContentResolver
-import android.content.ContentValues
 import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
+import android.os.Environment
 import android.util.Log
-import kotlinx.serialization.KSerializer
+import com.example.mobile_labs.model.disney.DisneyCharacter
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.util.*
 
-private const val TAG = "ExternalFileStorage"
+class ExternalFileStorage(private val context: Context) {
 
-class ExternalFileStorage(
-    context: Context,
-    fileName: String,
-    private val resolver: ContentResolver = context.contentResolver,
-    private val directoryUri: Uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-) {
-
-    private val fileName = "$fileName.txt"
-
-    // Найти существующий файл
-    private fun findFile(): Uri? {
-        val projection = arrayOf(MediaStore.MediaColumns._ID)
-        val selection = "${MediaStore.MediaColumns.DISPLAY_NAME} = ?"
-        val selectionArgs = arrayOf(fileName)
-
-        resolver.query(
-            directoryUri,
-            projection,
-            selection,
-            selectionArgs,
-            null
-        )?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
-                return Uri.withAppendedPath(directoryUri, id.toString())
-            }
-        }
-        return null
+    private val json = Json {
+        prettyPrint = true
+        encodeDefaults = true
     }
 
-    // Создать файл
-    private fun createFile(): Uri? {
-        val values = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
-        }
-        return resolver.insert(directoryUri, values)
-    }
-
-    // Записать данные в файл
-    fun <T> writeToFile(value: T, serializer: KSerializer<T>) {
-        val jsonString = Json.encodeToString(serializer, value)
-        val uri = findFile() ?: createFile()
-        if (uri == null) {
-            Log.e(TAG, "Failed to write to file. Uri is null")
-            return
-        }
-
-        resolver.openOutputStream(uri)?.bufferedWriter().use { writer ->
-            writer?.write(jsonString)
-        }
-    }
-
-    // Прочитать данные
-    fun <T> readFromFile(serializer: KSerializer<T>): T? {
-        val uri = findFile()
-        if (uri == null) {
-            Log.e(TAG, "Failed to read the file. Uri is null")
-            return null
-        }
-
-        return resolver.openInputStream(uri)?.bufferedReader().use { reader ->
-            reader?.readText()?.let { Json.decodeFromString(serializer, it) }
-        }
-    }
-
-    // Удалить файл
-    fun deleteFile(): Boolean {
-        val uri = findFile() ?: return false
+    fun saveDisneyCharacters(characters: List<DisneyCharacter>, fileName: String): Boolean {
         return try {
-            resolver.delete(uri, null, null) > 0
+            val backupData = DisneyBackupData(
+                characters = characters,
+                timestamp = System.currentTimeMillis(),
+                totalCount = characters.size,
+                appVersion = "1.0.0",
+                formatVersion = 1
+            )
+
+            val jsonContent = json.encodeToString(backupData)
+
+            val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+            if (!documentsDir.exists()) {
+                documentsDir.mkdirs()
+            }
+
+            val file = File(documentsDir, "$fileName.txt")
+            file.writeText(jsonContent)
+
+            Log.d("ExternalFileStorage", "Файл сохранен в формате JSON: ${file.absolutePath}")
+            Log.d("ExternalFileStorage", "Размер JSON: ${jsonContent.length} символов")
+            true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete file: ${e.message}")
+            Log.e("ExternalFileStorage", "Ошибка сохранения JSON", e)
             false
         }
     }
 
-    // Получить размер файла
-    fun getFileSize(): Long {
-        val uri = findFile() ?: return 0
-        return resolver.query(uri, arrayOf(MediaStore.MediaColumns.SIZE), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) cursor.getLong(0) else 0L
-        } ?: 0L
+    fun readDisneyCharacters(fileName: String): List<DisneyCharacter>? {
+        return try {
+            val file = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                "$fileName.txt"
+            )
+
+            if (!file.exists()) {
+                Log.d("ExternalFileStorage", "Файл не найден: $fileName.txt")
+                return null
+            }
+
+            val jsonContent = file.readText()
+            val backupData = json.decodeFromString<DisneyBackupData>(jsonContent)
+
+            Log.d("ExternalFileStorage", "Прочитано из JSON: ${backupData.characters.size} персонажей")
+            backupData.characters
+        } catch (e: Exception) {
+            Log.e("ExternalFileStorage", "Ошибка чтения JSON", e)
+            null
+        }
     }
 
-    // Получить дату последнего изменения
-    fun getFileModifiedDate(): Long {
-        val uri = findFile() ?: return 0
-        return resolver.query(uri, arrayOf(MediaStore.MediaColumns.DATE_MODIFIED), null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) cursor.getLong(0) * 1000 else 0L
-        } ?: 0L
+    fun getFileInfo(fileName: String): FileInfo? {
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            "$fileName.txt"
+        )
+
+        return if (file.exists()) {
+            FileInfo(
+                name = "$fileName.txt",
+                size = file.length(),
+                dateModified = Date(file.lastModified()),
+                path = file.absolutePath
+            )
+        } else {
+            null
+        }
+    }
+
+    fun deleteFile(fileName: String): Boolean {
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            "$fileName.txt"
+        )
+        return file.delete()
+    }
+
+    fun fileExists(fileName: String): Boolean {
+        val file = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+            "$fileName.txt"
+        )
+        return file.exists()
     }
 }
+
+@kotlinx.serialization.Serializable
+data class DisneyBackupData(
+    val characters: List<DisneyCharacter>,
+    val timestamp: Long,
+    val totalCount: Int,
+    val appVersion: String,
+    val formatVersion: Int
+)

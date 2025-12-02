@@ -17,17 +17,19 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
             setContent {
                 Mobile_labsTheme {
                     SettingsScreen(
-                        onBackClick = {
-                            findNavController().popBackStack()
-                        }
+                        onBackClick = { findNavController().popBackStack() }
                     )
                 }
             }
         }
     }
 }
+
+
