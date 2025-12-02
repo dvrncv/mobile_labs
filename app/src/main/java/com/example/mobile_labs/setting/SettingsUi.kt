@@ -27,7 +27,7 @@ import com.example.mobile_labs.R
 import com.example.mobile_labs.ui.theme.Pink40
 import com.example.mobile_labs.ui.theme.Pink80
 import androidx.compose.material.icons.filled.Notifications
-import com.example.mobile_labs.store.file.FileInfo
+import com.example.mobile_labs.store.file.ExternalFileInfo
 
 @Composable
 fun SettingsUi(
@@ -37,7 +37,7 @@ fun SettingsUi(
     onFontSizeChange: (Float) -> Unit,
     onBackClick: () -> Unit,
 
-    externalFileInfo: FileInfo?,
+    externalFileInfo: ExternalFileInfo?,
     backupAvailable: Boolean,
     onCreateBackupClick: () -> Unit,
     onRestoreClick: () -> Unit,
@@ -83,7 +83,7 @@ fun SettingsUi(
 
 @Composable
 fun BackupSection(
-    externalFileInfo: FileInfo?,
+    externalFileInfo: ExternalFileInfo?,
     backupAvailable: Boolean,
     onCreateBackupClick: () -> Unit,
     onRestoreClick: () -> Unit,
@@ -96,13 +96,7 @@ fun BackupSection(
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
     ) {
         Column(Modifier.padding(16.dp)) {
-
-            Text(
-                "Резервное копирование",
-                fontSize = fontSize.sp,
-                color = Color.White
-            )
-
+            Text("Резервное копирование", fontSize = fontSize.sp, color = Color.White)
             Spacer(Modifier.height(12.dp))
 
             Button(onClick = onCreateBackupClick) {
@@ -120,14 +114,14 @@ fun BackupSection(
                     onClick = onDeleteBackupClick,
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
-                    Text("Удалить резервную копию", fontSize = fontSize.sp)
+                    Text("Удалить внешний файл", fontSize = fontSize.sp)
                 }
             }
 
             Spacer(Modifier.height(12.dp))
 
             if (externalFileInfo != null) {
-                Text("Размер внешнего файла: ${externalFileInfo.formattedSize}", color = Color.White)
+                Text("Размер файла: ${externalFileInfo.formattedSize}", color = Color.White)
                 Text("Изменён: ${externalFileInfo.formattedDate}", color = Color.White)
             } else {
                 Text("Внешнего файла нет", color = Color.White)

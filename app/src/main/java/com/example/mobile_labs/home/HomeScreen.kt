@@ -34,24 +34,11 @@ import com.example.mobile_labs.network.ktor.KtorDisneyApi
 @Composable
 fun HomeScreen(
     onOpenSettings: () -> Unit,
-    fontSize: Float
+    fontSize: Float,
+    characters: List<DisneyCharacter>,
+    isLoading: Boolean,
+    errorMessage: String?
 ) {
-    val characters = remember { mutableStateListOf<DisneyCharacter>() }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        runCatching { KtorDisneyApi.getCharacters(351..400) }
-            .onSuccess { result ->
-                result.onSuccess { chars ->
-                    characters.clear()
-                    characters.addAll(chars)
-                }.onFailure { ex -> errorMessage = ex.message }
-            }
-            .onFailure { ex -> errorMessage = ex.message }
-        isLoading = false
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fon1),
@@ -71,7 +58,7 @@ fun HomeScreen(
             Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
                 when {
                     isLoading -> LoadingContent(fontSize)
-                    errorMessage != null -> ErrorContent(errorMessage!!, fontSize)
+                    errorMessage != null -> ErrorContent(errorMessage, fontSize)
                     characters.isEmpty() -> EmptyContent(fontSize)
                     else -> CharactersList(characters, fontSize)
                 }
