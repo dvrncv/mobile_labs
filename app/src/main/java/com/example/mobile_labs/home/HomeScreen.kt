@@ -24,12 +24,71 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import com.example.mobile_labs.R
 import com.example.mobile_labs.model.disney.DisneyCharacter
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.example.mobile_labs.network.ktor.KtorDisneyApi
+import com.example.mobile_labs.store.dataStore.SettingsDataStore
+import com.example.mobile_labs.store.file.InternalFileStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
+
+@Composable
+fun HomeScreenContainer(
+    onOpenSettings: () -> Unit
+) {
+    val context = LocalContext.current
+
+    val characters = remember { mutableStateListOf<DisneyCharacter>() }
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val settingsDataStore = remember { SettingsDataStore(context) }
+    val fontSize by settingsDataStore.currentFontSize.collectAsState(initial = 16f)
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.CoroutineScope(Dispatchers.IO).launch {
+            KtorDisneyApi
+                .getCharacters(351..400)
+                .onSuccess { list ->
+                    characters.clear()
+                    characters.addAll(list)
+
+                    val storage = InternalFileStorage(
+                        context = context,
+                        fileName = "disney_data.txt"
+                    )
+
+                    storage.writeToFile(
+                        characters.toList(),
+                        ListSerializer(DisneyCharacter.serializer())
+                    )
+                }
+                .onFailure { ex ->
+                    errorMessage = ex.message
+                }
+
+            withContext(Dispatchers.Main) {
+                isLoading = false
+            }
+        }
+    }
+
+    HomeScreen(
+        onOpenSettings = onOpenSettings,
+        fontSize = fontSize,
+        characters = characters,
+        isLoading = isLoading,
+        errorMessage = errorMessage
+    )
+}
+
 
 @Composable
 fun HomeScreen(
@@ -55,7 +114,12 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Box(modifier = Modifier.fillMaxSize().weight(1f), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
                 when {
                     isLoading -> LoadingContent(fontSize)
                     errorMessage != null -> ErrorContent(errorMessage, fontSize)

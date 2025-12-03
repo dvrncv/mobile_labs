@@ -1,35 +1,42 @@
 package com.example.mobile_labs.store.file
 
 import android.content.Context
-import android.util.Log
-import com.example.mobile_labs.model.disney.DisneyCharacter
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 
-class InternalBackupManager(private val context: Context) {
+class InternalFileStorage(
+    private val context: Context,
+    private val fileName: String,
+) {
 
-    private val backupFileName = "backup_copy.txt"
+    fun <T> writeToFile(value: T, serializer: KSerializer<T>): Boolean = runCatching {
+        context.openFileOutput(fileName, Context.MODE_PRIVATE).bufferedWriter().use { writer ->
+            writer.write(Json.encodeToString(serializer, value))
+        }
+        true
+    }.getOrDefault(false)
 
-    fun saveInternalBackup(originalFile: File) {
-        val internalFile = File(context.filesDir, backupFileName)
-        originalFile.copyTo(internalFile, overwrite = true)
-    }
+    fun <T> readFromFile(serializer: KSerializer<T>): T? = runCatching {
+        context.openFileInput(fileName).bufferedReader().use { reader ->
+            Json.decodeFromString(serializer, reader.readText())
+        }
+    }.getOrNull()
 
-    fun backupExists(): Boolean {
-        val internalFile = File(context.filesDir, backupFileName)
-        return internalFile.exists()
-    }
+    fun writeText(content: String): Boolean = runCatching {
+        context.openFileOutput(fileName, Context.MODE_PRIVATE).bufferedWriter().use { writer ->
+            writer.write(content)
+        }
+        true
+    }.getOrDefault(false)
 
-    fun restoreExternal(): Boolean {
-        val internalFile = File(context.filesDir, backupFileName)
-        if (!internalFile.exists()) return false
+    fun readText(): String? = runCatching {
+        context.openFileInput(fileName).bufferedReader().use { it.readText() }
+    }.getOrNull()
 
-        val externalDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOCUMENTS)
-        val externalFile = File(externalDir, "disney_backup.txt")
-        internalFile.copyTo(externalFile, overwrite = true)
-        return true
-    }
+    fun fileExists(): Boolean = context.getFileStreamPath(fileName)
+        .exists()
+
+    fun deleteFile(): Boolean = context.deleteFile(fileName)
 }

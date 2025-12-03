@@ -1,12 +1,13 @@
 package com.example.mobile_labs.store.file
 
+import android.content.ContentValues
 import android.content.Context
-import android.os.Environment
-import com.example.mobile_labs.model.disney.DisneyCharacter
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.io.File
-import java.util.*
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.documentfile.provider.DocumentFile
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class ExternalFileInfo(
     val name: String,
@@ -17,46 +18,92 @@ data class ExternalFileInfo(
     val formattedSize: String
         get() = when {
             size < 1024 -> "$size B"
-            size < 1024 * 1024 -> "${String.format("%.1f", size / 1024.0)} KB"
-            else -> "${String.format("%.1f", size / (1024.0 * 1024.0))} MB"
+            size < 1024 * 1024 -> String.format(Locale.getDefault(), "%.1f KB", size / 1024.0)
+            else -> String.format(Locale.getDefault(), "%.1f MB", size / (1024.0 * 1024.0))
         }
 
     val formattedDate: String
-        get() = java.text.SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-            .format(Date(modified))
+        get() = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date(modified))
 }
 
-class ExternalBackupManager(private val context: Context) {
+class ExternalFileStorage(
+    private val context: Context,
+    private val fileName: String,
+    private val directoryUri: Uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+) {
 
-    fun saveToExternal(characters: List<DisneyCharacter>, fileName: String): Boolean {
-        return try {
-            val json = Json.encodeToString<List<DisneyCharacter>>(characters)
-            val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-            if (!dir.exists()) dir.mkdirs()
-            val file = File(dir, "$fileName.txt")
-            file.writeText(json)
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
+    private val resolver = context.contentResolver
+
+    private fun findFileUri(): Uri? {
+        val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.DISPLAY_NAME)
+        val selection = "${MediaStore.MediaColumns.DISPLAY_NAME} = ?"
+        val selectionArgs = arrayOf(fileName)
+
+        resolver.query(
+            directoryUri,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        ).use { cursor ->
+            return if (cursor != null && cursor.moveToFirst()) {
+                val id = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
+                Uri.withAppendedPath(directoryUri, id.toString())
+            } else {
+                null
+            }
         }
     }
 
+    private fun createFile(): Uri? {
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "text/plain")
+        }
 
-    fun getFileInfo(fileName: String): ExternalFileInfo? {
-        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "$fileName.txt")
-        return if (file.exists()) {
-            ExternalFileInfo(file.name, file.length(), file.absolutePath, file.lastModified())
-        } else null
+        return resolver.insert(directoryUri, values)
     }
 
-    fun deleteExternal(fileName: String): Boolean {
-        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "$fileName.txt")
-        return file.exists() && file.delete()
+    private fun getOrCreateFile(): Uri? = findFileUri() ?: createFile()
+
+    fun writeText(content: String): Boolean = runCatching {
+        val uri = requireNotNull(getOrCreateFile())
+        resolver.openOutputStream(uri, "rwt")?.bufferedWriter().use { writer ->
+            writer?.apply {
+                write(content)
+                flush()
+            }
+        }
+        true
+    }.getOrDefault(false)
+
+    fun readText(): String? = runCatching {
+        val uri = findFileUri() ?: return null
+        resolver.openInputStream(uri)?.bufferedReader().use { reader ->
+            reader?.readText()
+        }
+    }.getOrNull()
+
+    fun getFileInfo(): ExternalFileInfo? {
+        val uri = findFileUri() ?: return null
+        val document = DocumentFile.fromSingleUri(context, uri)
+
+        val name = document?.name ?: fileName
+        val size = document?.length() ?: 0L
+        val modified = document?.lastModified() ?: System.currentTimeMillis()
+
+        return ExternalFileInfo(
+            name = name,
+            size = size,
+            path = uri.toString(),
+            modified = modified
+        )
     }
 
-    fun fileExists(fileName: String): Boolean {
-        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "$fileName.txt")
-        return file.exists()
-    }
+    fun fileExists(): Boolean = findFileUri() != null
+
+    fun deleteFile(): Boolean = runCatching {
+        val uri = findFileUri() ?: return false
+        resolver.delete(uri, null, null) > 0
+    }.getOrDefault(false)
 }
