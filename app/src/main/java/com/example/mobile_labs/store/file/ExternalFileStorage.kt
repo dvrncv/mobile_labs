@@ -74,6 +74,11 @@ class ExternalFileStorage(
                 flush()
             }
         }
+        val values = ContentValues().apply {
+            put(MediaStore.MediaColumns.SIZE, content.toByteArray().size.toLong())
+            put(MediaStore.MediaColumns.DATE_MODIFIED, System.currentTimeMillis() / 1000)
+        }
+        resolver.update(uri, values, null, null)
         true
     }.getOrDefault(false)
 
@@ -86,8 +91,33 @@ class ExternalFileStorage(
 
     fun getFileInfo(): ExternalFileInfo? {
         val uri = findFileUri() ?: return null
-        val document = DocumentFile.fromSingleUri(context, uri)
 
+        val projection = arrayOf(
+            MediaStore.MediaColumns.DISPLAY_NAME,
+            MediaStore.MediaColumns.SIZE,
+            MediaStore.MediaColumns.DATE_MODIFIED
+        )
+        
+        resolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+                val sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+                val dateIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
+                
+                val name = cursor.getString(nameIndex) ?: fileName
+                val size = cursor.getLong(sizeIndex)
+                val modified = cursor.getLong(dateIndex) * 1000
+                
+                return ExternalFileInfo(
+                    name = name,
+                    size = size,
+                    path = uri.toString(),
+                    modified = if (modified > 0) modified else System.currentTimeMillis()
+                )
+            }
+        }
+
+        val document = DocumentFile.fromSingleUri(context, uri)
         val name = document?.name ?: fileName
         val size = document?.length() ?: 0L
         val modified = document?.lastModified() ?: System.currentTimeMillis()

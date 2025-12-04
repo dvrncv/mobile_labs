@@ -33,11 +33,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.example.mobile_labs.network.ktor.KtorDisneyApi
 import com.example.mobile_labs.store.dataStore.SettingsDataStore
-import com.example.mobile_labs.store.file.InternalFileStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.builtins.ListSerializer
 
 @Composable
 fun HomeScreenContainer(
@@ -59,16 +57,6 @@ fun HomeScreenContainer(
                 .onSuccess { list ->
                     characters.clear()
                     characters.addAll(list)
-
-                    val storage = InternalFileStorage(
-                        context = context,
-                        fileName = "disney_data.txt"
-                    )
-
-                    storage.writeToFile(
-                        characters.toList(),
-                        ListSerializer(DisneyCharacter.serializer())
-                    )
                 }
                 .onFailure { ex ->
                     errorMessage = ex.message

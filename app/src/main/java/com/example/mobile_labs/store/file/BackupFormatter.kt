@@ -9,8 +9,11 @@ object BackupFormatter {
 
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
 
-    fun format(characters: List<DisneyCharacter>): String = buildString {
-        appendLine("=== Резервная копия данных Disney Characters ===")
+    fun format(characters: List<DisneyCharacter>, userNumber: Int? = null): String = buildString {
+        appendLine("Резервная копия данных Disney Characters")
+        if (userNumber != null) {
+            appendLine("Номер группы: $userNumber")
+        }
         appendLine("Дата создания: ${dateFormat.format(Date())}")
         appendLine("Количество записей: ${characters.size}")
         appendLine()
