@@ -5,15 +5,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-object BackupFormatter {
+object FormatBackup {
 
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
 
     fun format(characters: List<DisneyCharacter>, userNumber: Int? = null): String = buildString {
         appendLine("Резервная копия данных Disney Characters")
-        if (userNumber != null) {
-            appendLine("Номер группы: $userNumber")
-        }
         appendLine("Дата создания: ${dateFormat.format(Date())}")
         appendLine("Количество записей: ${characters.size}")
         appendLine()

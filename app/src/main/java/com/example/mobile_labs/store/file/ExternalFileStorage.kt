@@ -5,26 +5,6 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.documentfile.provider.DocumentFile
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-
-data class ExternalFileInfo(
-    val name: String,
-    val size: Long,
-    val path: String,
-    val modified: Long
-) {
-    val formattedSize: String
-        get() = when {
-            size < 1024 -> "$size B"
-            size < 1024 * 1024 -> String.format(Locale.getDefault(), "%.1f KB", size / 1024.0)
-            else -> String.format(Locale.getDefault(), "%.1f MB", size / (1024.0 * 1024.0))
-        }
-
-    val formattedDate: String
-        get() = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date(modified))
-}
 
 class ExternalFileStorage(
     private val context: Context,
@@ -89,13 +69,14 @@ class ExternalFileStorage(
         }
     }.getOrNull()
 
-    fun getFileInfo(): ExternalFileInfo? {
+    fun getFileInfo(): FileInfo? {
         val uri = findFileUri() ?: return null
 
         val projection = arrayOf(
             MediaStore.MediaColumns.DISPLAY_NAME,
             MediaStore.MediaColumns.SIZE,
-            MediaStore.MediaColumns.DATE_MODIFIED
+            MediaStore.MediaColumns.DATE_MODIFIED,
+            MediaStore.MediaColumns.RELATIVE_PATH
         )
         
         resolver.query(uri, projection, null, null, null)?.use { cursor ->
@@ -107,11 +88,27 @@ class ExternalFileStorage(
                 val name = cursor.getString(nameIndex) ?: fileName
                 val size = cursor.getLong(sizeIndex)
                 val modified = cursor.getLong(dateIndex) * 1000
+
+                val readablePath = try {
+                    val pathIndex = cursor.getColumnIndex(MediaStore.MediaColumns.RELATIVE_PATH)
+                    if (pathIndex >= 0) {
+                        val relativePath = cursor.getString(pathIndex)
+                        if (!relativePath.isNullOrEmpty()) {
+                            "/$relativePath"
+                        } else {
+                            "Загрузки"
+                        }
+                    } else {
+                        "Загрузки"
+                    }
+                } catch (e: Exception) {
+                    "Загрузки"
+                }
                 
-                return ExternalFileInfo(
+                return FileInfo(
                     name = name,
                     size = size,
-                    path = uri.toString(),
+                    path = readablePath,
                     modified = if (modified > 0) modified else System.currentTimeMillis()
                 )
             }
@@ -122,15 +119,13 @@ class ExternalFileStorage(
         val size = document?.length() ?: 0L
         val modified = document?.lastModified() ?: System.currentTimeMillis()
 
-        return ExternalFileInfo(
+        return FileInfo(
             name = name,
             size = size,
-            path = uri.toString(),
+            path = "Загрузки",
             modified = modified
         )
     }
-
-    fun fileExists(): Boolean = findFileUri() != null
 
     fun deleteFile(): Boolean = runCatching {
         val uri = findFileUri() ?: return false

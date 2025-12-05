@@ -29,7 +29,7 @@ import com.example.mobile_labs.R
 import com.example.mobile_labs.ui.theme.Pink40
 import com.example.mobile_labs.ui.theme.Pink80
 import androidx.compose.material.icons.filled.Notifications
-import com.example.mobile_labs.store.file.ExternalFileInfo
+import com.example.mobile_labs.store.file.FileInfo
 
 @Composable
 fun SettingsUi(
@@ -39,7 +39,7 @@ fun SettingsUi(
     onFontSizeChange: (Float) -> Unit,
     onBackClick: () -> Unit,
 
-    externalFileInfo: ExternalFileInfo?,
+    externalFileInfo: FileInfo?,
     backupAvailable: Boolean,
     isLoading: Boolean,
     onCreateBackupClick: () -> Unit,
@@ -87,7 +87,7 @@ fun SettingsUi(
 
 @Composable
 fun BackupSection(
-    externalFileInfo: ExternalFileInfo?,
+    externalFileInfo: FileInfo?,
     backupAvailable: Boolean,
     isLoading: Boolean,
     onCreateBackupClick: () -> Unit,
@@ -101,14 +101,19 @@ fun BackupSection(
         colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
     ) {
         Column(Modifier.padding(16.dp)) {
-            Text("Резервное копирование", fontSize = fontSize.sp, color = Color.White)
+            Text("Резервное копирование", fontSize = fontSize.sp, color = Pink40)
             Spacer(Modifier.height(12.dp))
 
-            // Кнопка создания резервной копии
             Button(
                 onClick = onCreateBackupClick,
                 enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = (fontSize * 2).dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Pink40,
+                    disabledContainerColor = Color.Gray.copy(alpha = 0.5f)
+                )
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
@@ -118,16 +123,17 @@ fun BackupSection(
                     )
                     Spacer(Modifier.width(8.dp))
                 }
-                Text("Создать резервную копию", fontSize = fontSize.sp)
+                Text("Создать резервную копию", fontSize = fontSize.sp, color = Color.White)
             }
 
             Spacer(Modifier.height(8.dp))
 
-            // Кнопка восстановления (активна только если есть резервная копия)
             Button(
                 onClick = onRestoreClick,
                 enabled = !isLoading && backupAvailable && externalFileInfo == null,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = (fontSize * 2).dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (backupAvailable && externalFileInfo == null) Pink40 else Color.Gray.copy(alpha = 0.5f)
                 )
@@ -137,13 +143,14 @@ fun BackupSection(
 
             Spacer(Modifier.height(8.dp))
 
-            // Кнопка удаления (активна только если есть внешний файл)
             Button(
                 onClick = onDeleteBackupClick,
                 enabled = !isLoading && externalFileInfo != null,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = (fontSize * 2).dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (externalFileInfo != null) Color.Red else Color.Gray.copy(alpha = 0.5f)
+                    containerColor = if (externalFileInfo != null) Pink40 else Color.Gray.copy(alpha = 0.5f)
                 )
             ) {
                 Text("Удалить внешний файл", fontSize = fontSize.sp)
@@ -153,47 +160,67 @@ fun BackupSection(
             Divider(color = Color.White.copy(alpha = 0.3f))
             Spacer(Modifier.height(12.dp))
 
-            // Информация о файле
-            Text("Информация о файле:", fontSize = (fontSize - 1).sp, color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text("Информация о файле:", fontSize = (fontSize - 1).sp, color = Pink40, style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
 
             if (externalFileInfo != null) {
-                InfoRow("Название:", externalFileInfo.name, fontSize)
+                InfoRow("Название:", externalFileInfo.name, fontSize, color = Pink40.copy(alpha = 0.7f))
                 Spacer(Modifier.height(4.dp))
-                InfoRow("Расположение:", externalFileInfo.path, fontSize)
+                InfoRow("Расположение:", externalFileInfo.path, fontSize, color = Pink40.copy(alpha = 0.7f))
                 Spacer(Modifier.height(4.dp))
-                InfoRow("Размер:", externalFileInfo.formattedSize, fontSize)
+                InfoRow("Размер:", externalFileInfo.formattedSize, fontSize, color = Pink40.copy(alpha = 0.7f))
                 Spacer(Modifier.height(4.dp))
-                InfoRow("Дата создания:", externalFileInfo.formattedDate, fontSize)
+                InfoRow("Дата создания:", externalFileInfo.formattedDate, fontSize, color = Pink40.copy(alpha = 0.7f))
             } else {
-                Text("Файл отсутствует в общедоступной директории", color = Color.White.copy(alpha = 0.7f), fontSize = (fontSize - 1).sp)
+                Text("Файл отсутствует в общедоступной директории", color = Pink40.copy(alpha = 0.7f), fontSize = (fontSize - 1).sp)
             }
 
             Spacer(Modifier.height(8.dp))
 
-            // Информация о резервной копии
-            Text("Резервная копия:", fontSize = (fontSize - 1).sp, color = Color.White, style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Резервная копия:",
+                fontSize = (fontSize - 1).sp,
+                color = Pink40,
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(Modifier.height(4.dp))
             if (backupAvailable) {
-                Text("✓ Резервная копия доступна во внутреннем хранилище", color = Color.Green.copy(alpha = 0.9f), fontSize = (fontSize - 1).sp)
+                Text(
+                    "Резервная копия доступна во внутреннем хранилище",
+                    color = Pink40.copy(alpha = 0.7f),
+                    fontSize = (fontSize - 1).sp
+                )
             } else {
-                Text("✗ Резервная копия отсутствует", color = Color.White.copy(alpha = 0.7f), fontSize = (fontSize - 1).sp)
+                Text(
+                    "Резервная копия отсутствует",
+                    color = Pink40.copy(alpha = 0.7f),
+                    fontSize = (fontSize - 1).sp
+                )
             }
         }
     }
 }
 
 @Composable
-private fun InfoRow(label: String, value: String, fontSize: Float) {
+private fun InfoRow(
+    label: String,
+    value: String,
+    fontSize: Float,
+    color: Color = Pink40
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(label, fontSize = (fontSize - 1).sp, color = Color.White.copy(alpha = 0.8f))
+        Text(
+            label,
+            fontSize = (fontSize - 1).sp,
+            color = color
+        )
         Text(
             value,
             fontSize = (fontSize - 1).sp,
-            color = Color.White,
+            color = color,
             modifier = Modifier.weight(1f),
             textAlign = androidx.compose.ui.text.style.TextAlign.End
         )

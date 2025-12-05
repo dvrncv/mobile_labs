@@ -48,6 +48,7 @@ fun HomeScreenContainer(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val settingsDataStore = remember { SettingsDataStore(context) }
+
     val fontSize by settingsDataStore.currentFontSize.collectAsState(initial = 16f)
 
     LaunchedEffect(Unit) {
