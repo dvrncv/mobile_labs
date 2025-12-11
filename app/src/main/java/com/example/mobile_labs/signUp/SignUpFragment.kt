@@ -30,15 +30,15 @@ class SignUpFragment : Fragment() {
                         onEmailChange = { email = it },
                         onPasswordChange = { password = it },
                         onSignIn = {
-                            val user = User(name = "", email = email,  password = password)
-                            findNavController().navigate(SignUpFragmentDirections.actionSignUpToSignIn(user))
+                             val user = User(name = "", email = email,  password = password)
+                             findNavController().navigate(SignUpFragmentDirections.actionSignUpToSignIn(user))
                         },
                         onSignUp = {
-                            val user = User(name = "", email = email,  password = password)
-                            findNavController().navigate(SignUpFragmentDirections.actionSignUpToSignIn(user))
+                             val user = User(name = "", email = email,  password = password)
+                             findNavController().navigate(SignUpFragmentDirections.actionSignUpToSignIn(user))
                         },
                         onBack = {
-                            parentFragmentManager.popBackStack()
+                             parentFragmentManager.popBackStack()
                         }
                     )
                 }

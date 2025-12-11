@@ -1,8 +1,11 @@
 package com.example.mobile_labs.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -12,16 +15,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +54,9 @@ import com.example.mobile_labs.ui.theme.Pink80
 fun TopBar(
     title: String,
     onSettingsClick: () -> Unit,
-    fontSize: Float
+    onRefreshClick: () -> Unit,
+    fontSize: Float,
+    isLoading: Boolean = false
 ) {
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
@@ -56,6 +69,19 @@ fun TopBar(
                 brush = Brush.horizontalGradient(listOf(Pink80, Pink40))
             )
     ) {
+        IconButton(
+            onClick = onRefreshClick,
+            enabled = !isLoading,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(
+                Icons.Filled.Refresh,
+                contentDescription = "Обновить",
+                tint = Color.White,
+                modifier = Modifier.size(fontSize.dp)
+            )
+        }
+
         Text(
             text = title,
             style = MaterialTheme.typography.titleLarge.copy(
@@ -88,7 +114,8 @@ fun TopBar(
 fun DisneyCharacterCard(
     character: DisneyCharacter,
     modifier: Modifier = Modifier,
-    fontSize: Float
+    fontSize: Float,
+    onDeleteClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -153,6 +180,11 @@ fun DisneyCharacterCard(
                 }
 
                 CharacterInfoBlock(character, fontSize)
+
+                CharacterActions(
+                    onDeleteClick = onDeleteClick,
+                    fontSize = fontSize
+                )
             }
         }
     }
@@ -219,6 +251,46 @@ fun CharacterInfoBlock(
                 color = Color.White.copy(alpha = 0.6f),
                 fontSize = fontSize.sp
             )
+        }
+    }
+}
+
+@Composable
+fun CharacterActions(
+    onDeleteClick: () -> Unit,
+    fontSize: Float
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val deleteInteractionSource = remember { MutableInteractionSource() }
+        Button(
+            onClick = onDeleteClick,
+            enabled = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    brush = Brush.horizontalGradient(listOf(Pink80, Pink40)),
+                    shape = RoundedCornerShape(8.dp)
+                ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = Color.White
+            ),
+            interactionSource = deleteInteractionSource
+        ) {
+            Icon(
+                Icons.Filled.Delete,
+                contentDescription = "Удалить",
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(4.dp))
+            Text("Удалить", fontSize = (fontSize * 0.85f).sp)
         }
     }
 }

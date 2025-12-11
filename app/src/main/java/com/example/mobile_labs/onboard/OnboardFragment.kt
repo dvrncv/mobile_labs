@@ -21,10 +21,10 @@ class OnboardFragment : Fragment() {
                 Mobile_labsTheme {
                     OnboardScreen(
                         onSignUp = {
-                            findNavController().navigate(OnboardFragmentDirections.actionOnboardToSignUp())
+                             findNavController().navigate(OnboardFragmentDirections.actionOnboardToSignUp())
                         },
                         onSignIn = {
-                            findNavController().navigate(OnboardFragmentDirections.actionOnboardToSignIn(user = null))
+                             findNavController().navigate(OnboardFragmentDirections.actionOnboardToSignIn(user = null))
                         }
                     )
                 }
