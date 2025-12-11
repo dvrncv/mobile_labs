@@ -28,7 +28,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -190,7 +189,6 @@ fun DisneyCharacterCard(
     }
 }
 
-
 @Composable
 private fun InfoSection(
     title: String,
@@ -221,7 +219,6 @@ private fun InfoSection(
         Spacer(Modifier.height(10.dp))
     }
 }
-
 
 @Composable
 fun CharacterInfoBlock(

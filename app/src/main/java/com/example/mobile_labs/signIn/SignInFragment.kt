@@ -13,7 +13,7 @@ import com.example.mobile_labs.ui.theme.Mobile_labsTheme
 
 class SignInFragment : Fragment() {
 
-     private val args: SignInFragmentArgs by navArgs()
+    private val args: SignInFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -23,8 +23,8 @@ class SignInFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 val user = args.user
-                var email by remember { mutableStateOf("") } // user?.email ?: ""
-                var password by remember { mutableStateOf("") } // user?.password ?: ""
+                var email by remember { mutableStateOf(user?.email ?: "") }
+                var password by remember { mutableStateOf(user?.password ?: "") }
 
                 Mobile_labsTheme {
                     SignInScreen(
