@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mobile_labs.signIn.R
 import com.example.mobile_labs.ui.theme.Pink40
 import com.example.mobile_labs.ui.theme.Pink80
 

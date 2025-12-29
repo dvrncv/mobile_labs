@@ -1,12 +1,12 @@
 package com.example.mobile_labs.home
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.mobile_labs.BaseActivity
+import android.os.Bundle
 import com.example.mobile_labs.ui.theme.Mobile_labsTheme
 
-class HomeActivity : ComponentActivity() {
+class HomeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

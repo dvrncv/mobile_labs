@@ -2,14 +2,18 @@ package com.example.mobile_labs.signUp
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.mobile_labs.home.HomeActivity
+import com.example.mobile_labs.BaseActivity
+import com.example.mobile_labs.model.User
 import com.example.mobile_labs.signIn.SignInActivity
 import com.example.mobile_labs.ui.theme.Mobile_labsTheme
 
-class SignUpActivity : ComponentActivity() {
+class SignUpActivity : BaseActivity() {
+    companion object {
+        const val USER_OBJECT = "user_object"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -18,7 +22,16 @@ class SignUpActivity : ComponentActivity() {
                 SignUpScreen(
                     onBack = { finish() },
                     onSignIn = { startActivity(Intent(this, SignInActivity::class.java)) },
-                    onSignUp = { startActivity(Intent(this, HomeActivity::class.java))
+                    onSignUp = { name, email, password ->
+                        val resultIntent = Intent().apply {
+                            putExtra(USER_OBJECT, User(name, email, password))
+                        }
+                        setResult(RESULT_OK, resultIntent)
+
+                        val signInIntent = Intent(this, SignInActivity::class.java).apply {
+                            putExtra(USER_OBJECT, User(name, email, password))
+                        }
+                        startActivity(signInIntent)
                         finish()
                     }
                 )

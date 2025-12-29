@@ -17,13 +17,27 @@ import kotlinx.coroutines.launch
 fun SignInScreen(
     onBack: () -> Unit = {},
     onSignUp: () -> Unit = {},
-    onSignIn: () -> Unit = {}
+    onSignIn: () -> Unit = {},
+    receivedEmail: String? = null,
+    receivedPassword: String? = null
 ) {
     val focusManager = LocalFocusManager.current
 
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var showPassword by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(receivedEmail) {
+        if (receivedEmail != null) {
+            email = receivedEmail
+        }
+    }
+    
+    LaunchedEffect(receivedPassword) {
+        if (receivedPassword != null) {
+            password = receivedPassword
+        }
+    }
 
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }

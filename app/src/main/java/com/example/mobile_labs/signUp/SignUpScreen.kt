@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -14,7 +12,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SignUpScreen(
     onBack: () -> Unit = {},
-    onSignUp: () -> Unit = {},
+    onSignUp: (name: String, email: String, password: String) -> Unit = { _, _, _ -> },
     onSignIn: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
@@ -68,7 +66,7 @@ fun SignUpScreen(
     fun handleSubmit() {
         focusManager.clearFocus()
         if (validate()) {
-            onSignUp()
+            onSignUp(name, email, password)
         }
     }
 
@@ -94,13 +92,19 @@ fun SignUpScreen(
 
                 EmailField(
                     value = email,
-                    onValueChange = { email = it; emailError = null },
+                    onValueChange = {
+                        email = it
+                        emailError = null
+                    },
                     error = emailError,
                 )
 
                 PasswordField(
                     value = password,
-                    onValueChange = { password = it; passwordError = null },
+                    onValueChange = {
+                        password = it
+                        passwordError = null
+                    },
                     showPassword = showPassword,
                     onToggleVisibility = { showPassword = !showPassword },
                     error = passwordError,
